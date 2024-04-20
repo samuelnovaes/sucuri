@@ -1,0 +1,10 @@
+(set calcularIMC (m h){
+  (return (div *m (pow *h 2)))
+})
+
+(set m (number (input "Insira sua massa: ")))
+(set h (number (input "Insira sua altura: ")))
+
+(set imc (calcularIMC *m *h))
+
+(print (format "Seu IMC é: %.2f" *imc) "\n")
