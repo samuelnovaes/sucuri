@@ -2,12 +2,9 @@ package lib
 
 import (
 	"github.com/samuelnovaes/sucuri/ast"
-	"github.com/samuelnovaes/sucuri/context"
 )
 
-type Function func(*context.Context, ...ast.Expression) ast.Expression
-
-var Lib = map[string]Function{
+var Lib = map[string]ast.LibFunction{
 	"set":    Set,
 	"print":  Print,
 	"format": Format,
@@ -24,4 +21,5 @@ var Lib = map[string]Function{
 	"mod":    Mod,
 	"pow":    Pow,
 	"neg":    Neg,
+	"eq":     Eq,
 }

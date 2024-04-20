@@ -4,13 +4,12 @@ import (
 	"fmt"
 
 	"github.com/samuelnovaes/sucuri/ast"
-	"github.com/samuelnovaes/sucuri/context"
 )
 
-func Input(ctx *context.Context, args ...ast.Expression) ast.Expression {
+func Input(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 	var value string
 	if len(args) > 0 {
-		prompt := args[0].GetValue()
+		prompt := args[0].GetValue(ctx)
 		fmt.Print(prompt)
 	}
 	_, error := fmt.Scan(&value)

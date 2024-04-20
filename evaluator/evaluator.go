@@ -2,11 +2,10 @@ package evaluator
 
 import (
 	"github.com/samuelnovaes/sucuri/ast"
-	"github.com/samuelnovaes/sucuri/context"
 	"github.com/samuelnovaes/sucuri/lib"
 )
 
-func callFunction(fn ast.Function, ctx context.Context) ast.Expression {
+func callFunction(fn ast.Function, ctx ast.Context) ast.Expression {
 	for _, expr := range fn.Body {
 		exprVal := evalExpression(expr, &ctx)
 		if exprVal.GetKind() == ast.RETURN {
@@ -16,24 +15,23 @@ func callFunction(fn ast.Function, ctx context.Context) ast.Expression {
 	return &ast.Null{}
 }
 
-func evalArg(arg ast.Expression, ctx *context.Context) ast.Expression {
+func evalArg(arg ast.Expression, ctx *ast.Context) ast.Expression {
 	argKind := arg.GetKind()
-	if (argKind == ast.IDENTIFIER && !arg.(*ast.Identifier).Evaluate) || argKind == ast.LIB {
+	if argKind == ast.IDENTIFIER && !arg.(*ast.Identifier).Evaluate {
 		return arg
 	}
 	return evalExpression(arg, ctx)
 }
 
-func evalCall(call ast.Call, ctx *context.Context) ast.Expression {
+func evalCall(call ast.Call, ctx *ast.Context) ast.Expression {
 	caller := evalExpression(call.Caller, ctx)
 	if caller.GetKind() == ast.LIB {
-		libExpr := caller.(*ast.Lib)
-		libFn := lib.Lib[libExpr.Symbol]
 		evalArgs := []ast.Expression{}
 		for _, arg := range call.Args {
 			evalArgs = append(evalArgs, evalArg(arg, ctx))
 		}
-		return libFn(ctx, evalArgs...)
+		fn := *caller.(*ast.Lib).Function
+		return fn(ctx, evalArgs...)
 	}
 	fn := caller.(*ast.Function)
 	ctxCopy := *ctx
@@ -47,18 +45,15 @@ func evalCall(call ast.Call, ctx *context.Context) ast.Expression {
 	return callFunction(*fn, *ctx)
 }
 
-func evalIdentifier(node ast.Identifier, ctx *context.Context) ast.Expression {
+func evalIdentifier(node ast.Identifier, ctx *ast.Context) ast.Expression {
 	val := (*ctx)[node.Symbol]
-	if val == nil && lib.Lib[node.Symbol] != nil {
-		val = &ast.Lib{Symbol: node.Symbol}
-	}
 	if val == nil {
 		val = &ast.Null{}
 	}
 	return val
 }
 
-func evalExpression(node ast.Expression, ctx *context.Context) ast.Expression {
+func evalExpression(node ast.Expression, ctx *ast.Context) ast.Expression {
 	kind := node.GetKind()
 	if kind == ast.CALL {
 		return evalCall(*node.(*ast.Call), ctx)
@@ -70,6 +65,9 @@ func evalExpression(node ast.Expression, ctx *context.Context) ast.Expression {
 }
 
 func Eval(program ast.Function) ast.Expression {
-	ctx := context.Context{}
+	ctx := ast.Context{}
+	for key, fn := range lib.Lib {
+		ctx[key] = &ast.Lib{Function: &fn}
+	}
 	return callFunction(program, ctx)
 }

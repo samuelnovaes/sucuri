@@ -1,7 +1,5 @@
 package ast
 
-import "fmt"
-
 const (
 	NUMBER     = iota
 	STRING     = iota
@@ -10,13 +8,16 @@ const (
 	IDENTIFIER = iota
 	CALL       = iota
 	FUNCTION   = iota
-	RETURN     = iota
 	LIB        = iota
+	RETURN     = iota
 )
+
+type LibFunction func(*Context, ...Expression) Expression
+type Context map[string]Expression
 
 type Expression interface {
 	GetKind() int
-	GetValue() any
+	GetValue(*Context) any
 }
 
 type Null struct {
@@ -27,7 +28,7 @@ func (node *Null) GetKind() int {
 	return NULL
 }
 
-func (node *Null) GetValue() any {
+func (node *Null) GetValue(ctx *Context) any {
 	return nil
 }
 
@@ -40,7 +41,7 @@ func (node *Number) GetKind() int {
 	return NUMBER
 }
 
-func (node *Number) GetValue() any {
+func (node *Number) GetValue(ctx *Context) any {
 	return node.Value
 }
 
@@ -53,7 +54,7 @@ func (node *String) GetKind() int {
 	return STRING
 }
 
-func (node *String) GetValue() any {
+func (node *String) GetValue(ctx *Context) any {
 	return node.Value
 }
 
@@ -66,7 +67,7 @@ func (node *Boolean) GetKind() int {
 	return BOOLEAN
 }
 
-func (node *Boolean) GetValue() any {
+func (node *Boolean) GetValue(ctx *Context) any {
 	return node.Value
 }
 
@@ -80,21 +81,9 @@ func (node *Identifier) GetKind() int {
 	return IDENTIFIER
 }
 
-func (node *Identifier) GetValue() any {
-	return fmt.Sprintf("[pointer %s]", node.Symbol)
-}
-
-type Lib struct {
-	Expression
-	Symbol string
-}
-
-func (node *Lib) GetKind() int {
-	return LIB
-}
-
-func (node *Lib) GetValue() any {
-	return fmt.Sprintf("[function %s]", node.Symbol)
+func (node *Identifier) GetValue(ctx *Context) any {
+	expr := (*ctx)[node.Symbol]
+	return &expr
 }
 
 type Call struct {
@@ -107,8 +96,8 @@ func (node *Call) GetKind() int {
 	return CALL
 }
 
-func (node *Call) GetValue() any {
-	return fmt.Sprintf("[call %v]", node.Caller.GetValue())
+func (node *Call) GetValue(ctx *Context) any {
+	return node
 }
 
 type Function struct {
@@ -121,8 +110,21 @@ func (node *Function) GetKind() int {
 	return FUNCTION
 }
 
-func (node *Function) GetValue() any {
-	return "[function]"
+func (node *Function) GetValue(ctx *Context) any {
+	return node
+}
+
+type Lib struct {
+	Expression
+	Function *LibFunction
+}
+
+func (node *Lib) GetKind() int {
+	return LIB
+}
+
+func (node *Lib) GetValue(ctx *Context) any {
+	return node.Function
 }
 
 type Return struct {
@@ -134,6 +136,6 @@ func (node *Return) GetKind() int {
 	return RETURN
 }
 
-func (node *Return) GetValue() any {
-	return fmt.Sprintf("[return %v]", node.Value)
+func (node *Return) GetValue(ctx *Context) any {
+	return node
 }

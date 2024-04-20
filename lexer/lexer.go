@@ -87,6 +87,13 @@ func readPointerValue(code *string) token.Token {
 	return tk
 }
 
+func readNegativeNumber(code *string) token.Token {
+	num := ""
+	num += shift(code)
+	num += readNumber(code).Literal
+	return token.Token{Type: token.NUMBER, Literal: num}
+}
+
 func Tokenize(code string) []token.Token {
 	tokens := []token.Token{}
 	for len(code) > 0 {
@@ -106,6 +113,8 @@ func Tokenize(code string) []token.Token {
 			tokens = append(tokens, readString(&code))
 		} else if code[0] == '*' {
 			tokens = append(tokens, readPointerValue(&code))
+		} else if code[0] == '-' {
+			tokens = append(tokens, readNegativeNumber(&code))
 		} else if isSkippable(code[0]) {
 			shift(&code)
 		} else {

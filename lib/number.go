@@ -4,10 +4,9 @@ import (
 	"strconv"
 
 	"github.com/samuelnovaes/sucuri/ast"
-	"github.com/samuelnovaes/sucuri/context"
 )
 
-func Number(ctx *context.Context, args ...ast.Expression) ast.Expression {
+func Number(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 	if args[0].GetKind() != ast.STRING {
 		panic("Invalid NUMBER operation")
 	}
