@@ -10,9 +10,9 @@ func If(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 		panic("Invalid IF operation")
 	}
 	condition := args[0].(*ast.Boolean).Value
+	(*ctx)["#IF"] = &ast.Boolean{Value: condition}
 	if condition {
 		evaluator.EvalFunction(*args[1].(*ast.Function), ctx)
 	}
-	(*ctx)["#IF"] = &ast.Boolean{Value: condition}
 	return &ast.Null{}
 }

@@ -7,6 +7,8 @@ import (
 	"github.com/samuelnovaes/sucuri/token"
 )
 
+const OPERATORS_ALPHABET = "!=+-*/%<>&|"
+
 func shift(code *string) string {
 	char := (*code)[0]
 	*code = (*code)[1:]
@@ -94,11 +96,25 @@ func readNegativeNumber(code *string) token.Token {
 	return token.Token{Type: token.NUMBER, Literal: num}
 }
 
+func readCall(code *string, tokens *[]token.Token) {
+	*tokens = append(*tokens, token.Token{Literal: shift(code), Type: token.OPEN_PAREM})
+	ident := ""
+	for isSkippable((*code)[0]) {
+		shift(code)
+	}
+	for strings.ContainsRune(OPERATORS_ALPHABET, rune((*code)[0])) {
+		ident += shift(code)
+	}
+	if ident != "" {
+		*tokens = append(*tokens, token.Token{Literal: ident, Type: token.IDENTIFIER})
+	}
+}
+
 func Tokenize(code string) []token.Token {
 	tokens := []token.Token{}
 	for len(code) > 0 {
 		if code[0] == '(' {
-			tokens = append(tokens, token.Token{Literal: shift(&code), Type: token.OPEN_PAREM})
+			readCall(&code, &tokens)
 		} else if code[0] == ')' {
 			tokens = append(tokens, token.Token{Literal: shift(&code), Type: token.CLOSE_PAREM})
 		} else if code[0] == '{' {
@@ -111,7 +127,7 @@ func Tokenize(code string) []token.Token {
 			tokens = append(tokens, readIdentifier(&code))
 		} else if code[0] == '"' {
 			tokens = append(tokens, readString(&code))
-		} else if code[0] == '*' {
+		} else if code[0] == '$' {
 			tokens = append(tokens, readPointerValue(&code))
 		} else if code[0] == '-' {
 			tokens = append(tokens, readNegativeNumber(&code))
