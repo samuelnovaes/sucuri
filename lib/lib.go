@@ -20,6 +20,7 @@ var Lib = map[string]ast.LibFunction{
 	"-":       Sub,
 	"*":       Mul,
 	"/":       Div,
+	"//":      IntDiv,
 	"++":      Inc,
 	"--":      Dec,
 	"%":       Mod,
@@ -31,4 +32,7 @@ var Lib = map[string]ast.LibFunction{
 	">=":      Gte,
 	"<=":      Lte,
 	"!":       Not,
+	"?":       Ternary,
+	"&&":      And,
+	"||":      Or,
 }
