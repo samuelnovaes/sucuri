@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/samuelnovaes/sucuri/ast"
 	"github.com/samuelnovaes/sucuri/token"
@@ -25,6 +26,7 @@ func parseNumber(tokens *[]token.Token) ast.Expression {
 
 func parseString(tokens *[]token.Token) ast.Expression {
 	literal := shift(tokens).Literal
+	literal = strings.ReplaceAll(literal, "\n", "\\n")
 	value, error := strconv.Unquote(literal)
 	if error != nil {
 		panic(fmt.Sprintf("Can not convert '%s' to string", literal))
