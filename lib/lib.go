@@ -20,7 +20,6 @@ var Lib = map[string]ast.LibFunction{
 	"inc":     Inc,
 	"dec":     Dec,
 	"mod":     Mod,
-	"pow":     Pow,
 	"neg":     Neg,
 	"eq":      Eq,
 	"ne":      Ne,
