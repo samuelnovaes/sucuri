@@ -116,6 +116,7 @@ func (node *Function) GetValue(ctx *Context) any {
 
 type Lib struct {
 	Expression
+	Symbol   string
 	Function *LibFunction
 }
 

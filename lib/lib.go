@@ -23,4 +23,12 @@ var Lib = map[string]ast.LibFunction{
 	"neg":    Neg,
 	"eq":     Eq,
 	"ne":     Ne,
+	"gt":     Gt,
+	"lt":     Lt,
+	"gte":    Gte,
+	"lte":    Lte,
+	"not":    Not,
+	"if":     If,
+	"elif":   Elif,
+	"else":   Else,
 }

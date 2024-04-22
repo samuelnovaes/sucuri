@@ -2,18 +2,7 @@ package evaluator
 
 import (
 	"github.com/samuelnovaes/sucuri/ast"
-	"github.com/samuelnovaes/sucuri/lib"
 )
-
-func callFunction(fn ast.Function, ctx ast.Context) ast.Expression {
-	for _, expr := range fn.Body {
-		exprVal := evalExpression(expr, &ctx)
-		if exprVal.GetKind() == ast.RETURN {
-			return exprVal.(*ast.Return).Value
-		}
-	}
-	return &ast.Null{}
-}
 
 func evalArg(arg ast.Expression, ctx *ast.Context) ast.Expression {
 	argKind := arg.GetKind()
@@ -25,6 +14,7 @@ func evalArg(arg ast.Expression, ctx *ast.Context) ast.Expression {
 
 func evalCall(call ast.Call, ctx *ast.Context) ast.Expression {
 	caller := evalExpression(call.Caller, ctx)
+
 	if caller.GetKind() == ast.LIB {
 		evalArgs := []ast.Expression{}
 		for _, arg := range call.Args {
@@ -33,16 +23,17 @@ func evalCall(call ast.Call, ctx *ast.Context) ast.Expression {
 		fn := *caller.(*ast.Lib).Function
 		return fn(ctx, evalArgs...)
 	}
+
 	fn := caller.(*ast.Function)
-	ctxCopy := *ctx
 	for i, ident := range fn.Args {
 		var argValue ast.Expression = &ast.Null{}
 		if len(call.Args) >= i+1 {
 			argValue = call.Args[i]
 		}
-		(*ctx)[ident.Symbol] = evalArg(argValue, &ctxCopy)
+		(*ctx)[ident.Symbol] = evalArg(argValue, ctx)
 	}
-	return callFunction(*fn, *ctx)
+
+	return EvalFunction(*fn, ctx)
 }
 
 func evalIdentifier(node ast.Identifier, ctx *ast.Context) ast.Expression {
@@ -64,10 +55,36 @@ func evalExpression(node ast.Expression, ctx *ast.Context) ast.Expression {
 	return node
 }
 
-func Eval(program ast.Function) ast.Expression {
-	ctx := ast.Context{}
-	for key, fn := range lib.Lib {
-		ctx[key] = &ast.Lib{Function: &fn}
+func validateIf(node ast.Expression, ctx *ast.Context) {
+	if node.GetKind() != ast.CALL {
+		(*ctx)["#IF"] = nil
+		return
 	}
-	return callFunction(program, ctx)
+	caller := node.(*ast.Call).Caller
+	if caller.GetKind() != ast.IDENTIFIER {
+		(*ctx)["#IF"] = nil
+		return
+	}
+	symbol := caller.(*ast.Identifier).Symbol
+	if symbol != "elif" && symbol != "else" {
+		(*ctx)["#IF"] = nil
+	}
+}
+
+func EvalFunction(fn ast.Function, ctx *ast.Context) ast.Expression {
+	ctxCopy := ast.Context{}
+	for key, value := range *ctx {
+		ctxCopy[key] = value
+	}
+	ctxCopy["#IF"] = nil
+
+	for _, expr := range fn.Body {
+		validateIf(expr, &ctxCopy)
+		exprVal := evalExpression(expr, &ctxCopy)
+		if exprVal.GetKind() == ast.RETURN {
+			return exprVal.(*ast.Return).Value
+		}
+	}
+
+	return &ast.Null{}
 }
