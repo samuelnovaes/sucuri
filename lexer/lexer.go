@@ -83,7 +83,7 @@ func readString(code *string) token.Token {
 func readPointerValue(code *string) token.Token {
 	shift(code)
 	tk := readIdentifier(code)
-	tk.Type = token.DOLLAR
+	tk.Type = token.POINTER_VALUE
 	return tk
 }
 

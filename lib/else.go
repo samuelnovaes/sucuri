@@ -12,5 +12,6 @@ func Else(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 	if !(*ctx)["#IF"].(*ast.Boolean).Value {
 		evaluator.EvalFunction(*args[0].(*ast.Function), ctx)
 	}
+	(*ctx)["#IF"] = nil
 	return &ast.Null{}
 }

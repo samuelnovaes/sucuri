@@ -93,7 +93,7 @@ func parse(tokens *[]token.Token) ast.Expression {
 		return parseBoolean(tokens)
 	case token.IDENTIFIER:
 		return parseIdentifier(tokens, false)
-	case token.DOLLAR:
+	case token.POINTER_VALUE:
 		return parseIdentifier(tokens, true)
 	case token.OPEN_PAREM:
 		return parseCall(tokens)
