@@ -1,4 +1,4 @@
-package structural
+package pointer
 
 import (
 	"github.com/samuelnovaes/sucuri/ast"

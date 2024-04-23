@@ -6,6 +6,7 @@ import (
 	"github.com/samuelnovaes/sucuri/lib/assignment"
 	"github.com/samuelnovaes/sucuri/lib/comparison"
 	"github.com/samuelnovaes/sucuri/lib/logical"
+	"github.com/samuelnovaes/sucuri/lib/pointer"
 	"github.com/samuelnovaes/sucuri/lib/structural"
 )
 
@@ -22,7 +23,6 @@ var Lib = map[string]ast.LibFunction{
 	"else":    structural.Else,
 	"var":     structural.Var,
 	"const":   structural.Const,
-	"$":       structural.EvalPtr,
 	"?":       structural.Ternary,
 	"=":       assignment.Set,
 	"++":      assignment.Inc,
@@ -52,4 +52,5 @@ var Lib = map[string]ast.LibFunction{
 	"!":       logical.Not,
 	"&&":      logical.And,
 	"||":      logical.Or,
+	"$":       pointer.EvalPtr,
 }
