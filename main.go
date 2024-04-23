@@ -20,7 +20,8 @@ func main() {
 		"#IF": nil,
 	}
 	for key, fn := range lib.Lib {
-		ctx[key] = &ast.Lib{Symbol: key, Function: &fn}
+		lib := ast.Lib{Function: &fn}
+		ctx[key] = &ast.Reference{Value: &lib, Const: true}
 	}
 
 	tokens := lexer.Tokenize(string(code))

@@ -7,7 +7,7 @@ import (
 	"github.com/samuelnovaes/sucuri/token"
 )
 
-const OPERATORS_ALPHABET = "!=+-*/%<>&|?"
+const OPERATORS_ALPHABET = "!=+-*/%<>&|?$"
 
 func shift(code *string) string {
 	char := (*code)[0]

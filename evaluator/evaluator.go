@@ -1,6 +1,8 @@
 package evaluator
 
 import (
+	"fmt"
+
 	"github.com/samuelnovaes/sucuri/ast"
 )
 
@@ -9,11 +11,11 @@ func evalArg(arg ast.Expression, ctx *ast.Context) ast.Expression {
 	if argKind == ast.IDENTIFIER && !arg.(*ast.Identifier).Evaluate {
 		return arg
 	}
-	return evalExpression(arg, ctx)
+	return EvalExpression(arg, ctx)
 }
 
 func evalCall(call ast.Call, ctx *ast.Context) ast.Expression {
-	caller := evalExpression(call.Caller, ctx)
+	caller := EvalExpression(call.Caller, ctx)
 
 	if caller.GetKind() == ast.LIB {
 		evalArgs := []ast.Expression{}
@@ -28,31 +30,26 @@ func evalCall(call ast.Call, ctx *ast.Context) ast.Expression {
 	for i, ident := range fn.Args {
 		var argValue ast.Expression = &ast.Null{}
 		if len(call.Args) >= i+1 {
-			argValue = call.Args[i]
+			arg := call.Args[i]
+			if arg.GetKind() == ast.IDENTIFIER {
+				argValue = (*ctx)[arg.(*ast.Identifier).Symbol]
+			} else {
+				argValue = arg
+			}
 		}
-		(*ctx)[ident.Symbol] = evalArg(argValue, ctx)
+		argEvaluated := evalArg(argValue, ctx)
+		(*ctx)[ident.Symbol] = &ast.Reference{Value: argEvaluated, Const: true}
 	}
 
 	return EvalFunction(*fn, ctx)
 }
 
 func evalIdentifier(node ast.Identifier, ctx *ast.Context) ast.Expression {
-	val := (*ctx)[node.Symbol]
-	if val == nil {
-		val = &ast.Null{}
+	ref, ok := (*ctx)[node.Symbol]
+	if !ok {
+		panic(fmt.Sprintf("%s is not defined", node.Symbol))
 	}
-	return val
-}
-
-func evalExpression(node ast.Expression, ctx *ast.Context) ast.Expression {
-	kind := node.GetKind()
-	if kind == ast.CALL {
-		return evalCall(*node.(*ast.Call), ctx)
-	}
-	if kind == ast.IDENTIFIER {
-		return evalIdentifier(*node.(*ast.Identifier), ctx)
-	}
-	return node
+	return ref.Value
 }
 
 func validateIf(node ast.Expression, ctx *ast.Context) {
@@ -71,6 +68,17 @@ func validateIf(node ast.Expression, ctx *ast.Context) {
 	}
 }
 
+func EvalExpression(node ast.Expression, ctx *ast.Context) ast.Expression {
+	kind := node.GetKind()
+	if kind == ast.CALL {
+		return evalCall(*node.(*ast.Call), ctx)
+	}
+	if kind == ast.IDENTIFIER {
+		return evalIdentifier(*node.(*ast.Identifier), ctx)
+	}
+	return node
+}
+
 func EvalFunction(fn ast.Function, ctx *ast.Context) ast.Expression {
 	ctxCopy := ast.Context{}
 	for key, value := range *ctx {
@@ -80,7 +88,7 @@ func EvalFunction(fn ast.Function, ctx *ast.Context) ast.Expression {
 
 	for _, expr := range fn.Body {
 		validateIf(expr, &ctxCopy)
-		exprVal := evalExpression(expr, &ctxCopy)
+		exprVal := EvalExpression(expr, &ctxCopy)
 		if exprVal.GetKind() == ast.RETURN {
 			return exprVal.(*ast.Return).Value
 		}
