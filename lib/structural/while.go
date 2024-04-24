@@ -8,7 +8,11 @@ import (
 func While(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 	condition := args[0].(*ast.Function)
 	callback := args[1].(*ast.Function)
-	for evaluator.EvalFunction(*condition, ctx).(*ast.Boolean).Value {
+	checkCondition := func() bool {
+		result, _ := evaluator.EvalFunction(*condition, ctx)
+		return result.(*ast.Boolean).Value
+	}
+	for checkCondition() {
 		evaluator.EvalFunction(*callback, ctx)
 	}
 	return &ast.Null{}

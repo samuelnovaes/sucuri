@@ -25,6 +25,7 @@ var Lib = map[string]ast.LibFunction{
 	"var":     structural.Var,
 	"const":   structural.Const,
 	"while":   structural.While,
+	"for":     structural.For,
 	"?":       structural.Ternary,
 	"=":       assignment.Set,
 	"++":      assignment.Inc,
