@@ -45,7 +45,7 @@ func readNumber(code *string) token.Token {
 
 func readIdentifier(code *string) token.Token {
 	ident := ""
-	for len(*code) > 0 && (isAphaNum((*code)[0]) || (len(ident) > 0 && ident[len(ident)-1] != '.' && (*code)[0] == '.' && len(*code) > 1 && isAlpha((*code)[1]))) {
+	for len(*code) > 0 && (isAphaNum((*code)[0])) {
 		ident += shift(code)
 	}
 	var tokenType int
