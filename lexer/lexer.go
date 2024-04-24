@@ -110,6 +110,23 @@ func readCall(code *string, tokens *[]token.Token) {
 	}
 }
 
+func parseComment(code *string) {
+	if (*code)[1] == '/' {
+		shift(code)
+		for (*code)[0] != '\n' {
+			shift(code)
+		}
+		return
+	}
+	if (*code)[1] == '*' {
+		for len(*code) > 1 && !((*code)[0] == '*' && (*code)[1] == '/') {
+			shift(code)
+		}
+		shift(code)
+		shift(code)
+	}
+}
+
 func Tokenize(code string) []token.Token {
 	tokens := []token.Token{}
 	for len(code) > 0 {
@@ -137,6 +154,8 @@ func Tokenize(code string) []token.Token {
 			tokens = append(tokens, readPointerValue(&code))
 		} else if code[0] == '-' {
 			tokens = append(tokens, readNegativeNumber(&code))
+		} else if len(code) > 1 && code[0] == '/' && (code[1] == '/' || code[1] == '*') {
+			parseComment(&code)
 		} else if isSkippable(code[0]) {
 			shift(&code)
 		} else {
