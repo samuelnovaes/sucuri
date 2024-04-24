@@ -32,7 +32,12 @@ func evalCall(call ast.Call, ctx *ast.Context) ast.Expression {
 		if len(call.Args) >= i+1 {
 			arg := call.Args[i]
 			if arg.GetKind() == ast.IDENTIFIER {
-				argValue = (*ctx)[arg.(*ast.Identifier).Symbol]
+				identRef := arg.(*ast.Identifier)
+				if identRef.Evaluate {
+					argValue = ast.GetRef(identRef, ctx).Value
+				} else {
+					argValue = (*ctx)[arg.(*ast.Identifier).Symbol]
+				}
 			} else {
 				argValue = arg
 			}
