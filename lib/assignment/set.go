@@ -13,5 +13,5 @@ func Set(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 		panic("Invalid SET operation")
 	}
 	ref.Value = args[1]
-	return &ast.Null{}
+	return args[1]
 }

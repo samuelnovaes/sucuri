@@ -1,4 +1,4 @@
-package structural
+package std
 
 import (
 	"github.com/samuelnovaes/sucuri/ast"

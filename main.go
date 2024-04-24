@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	code, err := os.ReadFile(os.Args[1])
+	code, err := os.ReadFile("example.suc")
 	if err != nil {
 		panic(err.Error())
 	}
