@@ -11,6 +11,7 @@ const (
 	OPEN_BRACE    = iota
 	CLOSE_BRACE   = iota
 	POINTER_VALUE = iota
+	COLON         = iota
 )
 
 type Token struct {

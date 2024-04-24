@@ -47,7 +47,7 @@ func parseIdentifier(tokens *[]token.Token, evaluate bool) ast.Expression {
 	return &ast.Identifier{Symbol: literal, Evaluate: evaluate}
 }
 
-func parseFunction(tokens *[]token.Token, caller ast.Expression, args []ast.Expression) ast.Expression {
+func getFuncArgs(caller ast.Expression, args []ast.Expression) []ast.Identifier {
 	funcArgs := []ast.Identifier{}
 	if caller != nil {
 		funcArgs = append(funcArgs, *caller.(*ast.Identifier))
@@ -55,13 +55,29 @@ func parseFunction(tokens *[]token.Token, caller ast.Expression, args []ast.Expr
 	for _, arg := range args {
 		funcArgs = append(funcArgs, *arg.(*ast.Identifier))
 	}
+	return funcArgs
+}
+
+func parseFunction(tokens *[]token.Token, caller ast.Expression, args []ast.Expression) ast.Expression {
 	body := []ast.Expression{}
 	shift(tokens)
 	for len(*tokens) > 0 && (*tokens)[0].Type != token.CLOSE_BRACE {
 		body = append(body, parse(tokens))
 	}
 	shift(tokens)
-	return &ast.Function{Args: funcArgs, Body: body}
+	return &ast.Function{Args: getFuncArgs(caller, args), Body: body}
+}
+
+func parseLambda(tokens *[]token.Token, caller ast.Expression, args []ast.Expression) ast.Expression {
+	shift(tokens)
+	body := []ast.Expression{}
+	if len(*tokens) > 0 {
+		body = append(body, &ast.Call{
+			Args:   []ast.Expression{parse(tokens)},
+			Caller: &ast.Identifier{Symbol: "return", Evaluate: false},
+		})
+	}
+	return &ast.Function{Args: getFuncArgs(caller, args), Body: body}
 }
 
 func parseCall(tokens *[]token.Token) ast.Expression {
@@ -76,8 +92,13 @@ func parseCall(tokens *[]token.Token) ast.Expression {
 		}
 	}
 	shift(tokens)
-	if len(*tokens) > 0 && (*tokens)[0].Type == token.OPEN_BRACE {
-		return parseFunction(tokens, caller, args)
+	if len(*tokens) > 0 {
+		if (*tokens)[0].Type == token.OPEN_BRACE {
+			return parseFunction(tokens, caller, args)
+		}
+		if (*tokens)[0].Type == token.COLON {
+			return parseLambda(tokens, caller, args)
+		}
 	}
 	return &ast.Call{Caller: caller, Args: args}
 }
@@ -97,6 +118,8 @@ func parse(tokens *[]token.Token) ast.Expression {
 		return parseIdentifier(tokens, true)
 	case token.OPEN_PAREM:
 		return parseCall(tokens)
+	case token.COLON:
+		return parseLambda(tokens, nil, []ast.Expression{})
 	case token.NULL:
 		expr := &ast.Null{}
 		shift(tokens)

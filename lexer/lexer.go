@@ -121,6 +121,8 @@ func Tokenize(code string) []token.Token {
 			tokens = append(tokens, token.Token{Literal: shift(&code), Type: token.OPEN_BRACE})
 		} else if code[0] == '}' {
 			tokens = append(tokens, token.Token{Literal: shift(&code), Type: token.CLOSE_BRACE})
+		} else if code[0] == ':' {
+			tokens = append(tokens, token.Token{Literal: shift(&code), Type: token.COLON})
 		} else if isDigit(code[0]) {
 			tokens = append(tokens, readNumber(&code))
 		} else if isAlpha(code[0]) {
