@@ -6,13 +6,21 @@ import (
 )
 
 func If(ctx *ast.Context, args ...ast.Expression) ast.Expression {
-	if args[0].GetKind() != ast.BOOLEAN || args[1].GetKind() != ast.FUNCTION {
-		panic("Invalid IF operation")
+	condition := args[0].(*ast.Function)
+	checkCondition := func() bool {
+		result, _, _ := evaluator.EvalFunction(*condition, ctx)
+		return result.(*ast.Boolean).Value
 	}
-	condition := args[0].(*ast.Boolean).Value
-	(*ctx)["#IF"] = &ast.Reference{Value: &ast.Boolean{Value: condition}, Const: true}
-	if condition {
-		evaluator.EvalFunction(*args[1].(*ast.Function), ctx)
+	var passed bool
+	if checkCondition() {
+		passed = true
+		result, _, returned := evaluator.EvalFunction(*args[1].(*ast.Function), ctx)
+		if returned {
+			return &ast.Return{Value: result}
+		}
+	} else {
+		passed = false
 	}
+	(*ctx)["#IF"] = &ast.Reference{Value: &ast.Boolean{Value: passed}, Const: true}
 	return &ast.Null{}
 }
