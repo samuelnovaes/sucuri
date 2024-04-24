@@ -10,6 +10,8 @@ const (
 	CLOSE_PAREM   = iota
 	OPEN_BRACE    = iota
 	CLOSE_BRACE   = iota
+	OPEN_BRACKET  = iota
+	CLOSE_BRACKET = iota
 	POINTER_VALUE = iota
 	COLON         = iota
 )

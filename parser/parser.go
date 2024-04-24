@@ -47,37 +47,48 @@ func parseIdentifier(tokens *[]token.Token, evaluate bool) ast.Expression {
 	return &ast.Identifier{Symbol: literal, Evaluate: evaluate}
 }
 
-func getFuncArgs(caller ast.Expression, args []ast.Expression) []ast.Identifier {
-	funcArgs := []ast.Identifier{}
-	if caller != nil {
-		funcArgs = append(funcArgs, *caller.(*ast.Identifier))
-	}
-	for _, arg := range args {
-		funcArgs = append(funcArgs, *arg.(*ast.Identifier))
-	}
-	return funcArgs
-}
-
-func parseFunction(tokens *[]token.Token, caller ast.Expression, args []ast.Expression) ast.Expression {
+func parseBraceBody(tokens *[]token.Token) []ast.Expression {
 	body := []ast.Expression{}
 	shift(tokens)
 	for len(*tokens) > 0 && (*tokens)[0].Type != token.CLOSE_BRACE {
 		body = append(body, parse(tokens))
 	}
 	shift(tokens)
-	return &ast.Function{Args: getFuncArgs(caller, args), Body: body}
+	return body
 }
 
-func parseLambda(tokens *[]token.Token, caller ast.Expression, args []ast.Expression) ast.Expression {
+func parseFunction(tokens *[]token.Token) ast.Expression {
 	shift(tokens)
 	body := []ast.Expression{}
-	if len(*tokens) > 0 {
-		body = append(body, &ast.Call{
-			Args:   []ast.Expression{parse(tokens)},
-			Caller: &ast.Identifier{Symbol: "return", Evaluate: false},
-		})
+	args := []ast.Identifier{}
+	for len(*tokens) > 0 && (*tokens)[0].Type != token.CLOSE_BRACKET {
+		args = append(args, *parse(tokens).(*ast.Identifier))
 	}
-	return &ast.Function{Args: getFuncArgs(caller, args), Body: body}
+	shift(tokens)
+	if len(*tokens) > 0 {
+		if (*tokens)[0].Type == token.OPEN_BRACE {
+			body = parseBraceBody(tokens)
+		} else {
+			body = []ast.Expression{&ast.Call{
+				Args:   []ast.Expression{parse(tokens)},
+				Caller: &ast.Identifier{Symbol: "return", Evaluate: false},
+			}}
+		}
+	}
+	return &ast.Function{Args: args, Body: body}
+}
+
+func parseColonFunction(tokens *[]token.Token) ast.Expression {
+	shift(tokens)
+	body := []ast.Expression{&ast.Call{
+		Args:   []ast.Expression{parse(tokens)},
+		Caller: &ast.Identifier{Symbol: "return", Evaluate: false},
+	}}
+	return &ast.Function{Args: []ast.Identifier{}, Body: body}
+}
+
+func parseBraceFunction(tokens *[]token.Token) ast.Expression {
+	return &ast.Function{Args: []ast.Identifier{}, Body: parseBraceBody(tokens)}
 }
 
 func parseCall(tokens *[]token.Token) ast.Expression {
@@ -92,14 +103,6 @@ func parseCall(tokens *[]token.Token) ast.Expression {
 		}
 	}
 	shift(tokens)
-	if len(*tokens) > 0 {
-		if (*tokens)[0].Type == token.OPEN_BRACE {
-			return parseFunction(tokens, caller, args)
-		}
-		if (*tokens)[0].Type == token.COLON {
-			return parseLambda(tokens, caller, args)
-		}
-	}
 	return &ast.Call{Caller: caller, Args: args}
 }
 
@@ -118,8 +121,12 @@ func parse(tokens *[]token.Token) ast.Expression {
 		return parseIdentifier(tokens, true)
 	case token.OPEN_PAREM:
 		return parseCall(tokens)
+	case token.OPEN_BRACKET:
+		return parseFunction(tokens)
 	case token.COLON:
-		return parseLambda(tokens, nil, []ast.Expression{})
+		return parseColonFunction(tokens)
+	case token.OPEN_BRACE:
+		return parseBraceFunction(tokens)
 	case token.NULL:
 		expr := &ast.Null{}
 		shift(tokens)
