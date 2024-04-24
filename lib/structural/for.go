@@ -15,12 +15,22 @@ func For(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 		result, _, _ := evaluator.EvalFunction(*condition, ctxCopy)
 		return result.(*ast.Boolean).Value
 	}
+	finalize := func() {
+		evaluator.EvalFunction(*finalizer, ctxCopy)
+	}
 	for checkCondition() {
 		result, _, returned := evaluator.EvalFunction(*callback, ctxCopy)
+		if result.GetKind() == ast.BREAK {
+			break
+		}
+		if result.GetKind() == ast.CONTINUE {
+			finalize()
+			continue
+		}
 		if returned {
 			return &ast.Return{Value: result}
 		}
-		evaluator.EvalFunction(*finalizer, ctxCopy)
+		finalize()
 	}
 	return &ast.Null{}
 }

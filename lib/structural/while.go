@@ -14,6 +14,12 @@ func While(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 	}
 	for checkCondition() {
 		result, _, returned := evaluator.EvalFunction(*callback, ctx)
+		if result.GetKind() == ast.BREAK {
+			break
+		}
+		if result.GetKind() == ast.CONTINUE {
+			continue
+		}
 		if returned {
 			return &ast.Return{Value: result}
 		}

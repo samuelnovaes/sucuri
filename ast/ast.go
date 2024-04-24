@@ -15,6 +15,8 @@ const (
 	LIB        = iota
 	RETURN     = iota
 	REFERENCE  = iota
+	BREAK      = iota
+	CONTINUE   = iota
 )
 
 type LibFunction func(*Context, ...Expression) Expression
@@ -26,6 +28,9 @@ type Expression interface {
 	GetValue(*Context) any
 	ToString(ctx *Context) string
 }
+
+// REFERENCE ===========================================================
+//
 
 type Reference struct {
 	Expression
@@ -45,6 +50,10 @@ func (node *Reference) ToString(ctx *Context) string {
 	return fmt.Sprintf("%p", &node.Value)
 }
 
+//
+// NULL ================================================================
+//
+
 type Null struct {
 	Expression
 }
@@ -60,6 +69,10 @@ func (node *Null) GetValue(ctx *Context) any {
 func (node *Null) ToString(ctx *Context) string {
 	return "null"
 }
+
+//
+// NUMBER ==============================================================
+//
 
 type Number struct {
 	Expression
@@ -78,6 +91,10 @@ func (node *Number) ToString(ctx *Context) string {
 	return fmt.Sprintf("%v", node.Value)
 }
 
+//
+// STRING ==============================================================
+//
+
 type String struct {
 	Expression
 	Value string
@@ -94,6 +111,10 @@ func (node *String) GetValue(ctx *Context) any {
 func (node *String) ToString(ctx *Context) string {
 	return node.Value
 }
+
+//
+// BOOLEAN =============================================================
+//
 
 type Boolean struct {
 	Expression
@@ -114,6 +135,10 @@ func (node *Boolean) ToString(ctx *Context) string {
 	}
 	return "false"
 }
+
+//
+// IDENTIFIER ==========================================================
+//
 
 type Identifier struct {
 	Expression
@@ -141,6 +166,10 @@ func (node *Identifier) ToString(ctx *Context) string {
 	return (&Null{}).ToString(ctx)
 }
 
+//
+// CALL ================================================================
+//
+
 type Call struct {
 	Expression
 	Args   []Expression
@@ -158,6 +187,10 @@ func (node *Call) GetValue(ctx *Context) any {
 func (node *Call) ToString(ctx *Context) string {
 	return fmt.Sprintf("%p", &node)
 }
+
+//
+// FUNCTION ============================================================
+//
 
 type Function struct {
 	Expression
@@ -177,6 +210,10 @@ func (node *Function) ToString(ctx *Context) string {
 	return fmt.Sprintf("%p", &node)
 }
 
+//
+// LIB =================================================================
+//
+
 type Lib struct {
 	Expression
 	Function *LibFunction
@@ -194,6 +231,10 @@ func (node *Lib) ToString(ctx *Context) string {
 	return fmt.Sprintf("%p", &node)
 }
 
+//
+// RETURN ==============================================================
+//
+
 type Return struct {
 	Expression
 	Value Expression
@@ -210,6 +251,49 @@ func (node *Return) GetValue(ctx *Context) any {
 func (node *Return) ToString(ctx *Context) string {
 	return fmt.Sprintf("%p", &node)
 }
+
+//
+// BREAK ===============================================================
+//
+
+type Break struct {
+	Expression
+}
+
+func (node *Break) GetKind() int {
+	return BREAK
+}
+
+func (node *Break) GetValue(ctx *Context) any {
+	return node
+}
+
+func (node *Break) ToString(ctx *Context) string {
+	return fmt.Sprintf("%p", &node)
+}
+
+//
+// CONTINUE ============================================================
+//
+
+type Continue struct {
+	Expression
+}
+
+func (node *Continue) GetKind() int {
+	return CONTINUE
+}
+
+func (node *Continue) GetValue(ctx *Context) any {
+	return node
+}
+
+func (node *Continue) ToString(ctx *Context) string {
+	return fmt.Sprintf("%p", &node)
+}
+
+//
+// =====================================================================
 
 func GetRef(value Expression, ctx *Context) *Reference {
 	if value.GetKind() == REFERENCE {

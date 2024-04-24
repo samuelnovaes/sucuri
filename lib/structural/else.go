@@ -14,6 +14,9 @@ func Else(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 		if returned {
 			return &ast.Return{Value: result}
 		}
+		if result.GetKind() == ast.BREAK || result.GetKind() == ast.CONTINUE {
+			return result
+		}
 	}
 	(*ctx)["#IF"] = nil
 	return &ast.Null{}
