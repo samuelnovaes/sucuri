@@ -18,7 +18,7 @@ var Lib = map[string]ast.LibFunction{
 	"input":    std.Input,
 	"number":   std.Number,
 	"string":   std.String,
-	"obj":      std.Obj,
+	"obj":      structural.Obj,
 	"return":   structural.Return,
 	"if":       structural.If,
 	"elif":     structural.Elif,
