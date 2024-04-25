@@ -10,9 +10,9 @@ import (
 const OPERATORS_ALPHABET = "!=+-*/%<>&|?$"
 
 func shift(code *string) string {
-	char := (*code)[0]
+	char := (*code)[0:1]
 	*code = (*code)[1:]
-	return string(char)
+	return char
 }
 
 func isAlpha(char byte) bool {
