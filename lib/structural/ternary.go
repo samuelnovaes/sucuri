@@ -15,6 +15,6 @@ func Ternary(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 	} else {
 		fn = args[2]
 	}
-	result, _, _ := evaluator.EvalFunction(*fn.(*ast.Function), ctx)
+	result, _, _ := evaluator.EvalFunction(*fn.(*ast.Function), ctx, &ast.Null{})
 	return result
 }

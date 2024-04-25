@@ -10,16 +10,16 @@ func For(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 	condition := args[1].(*ast.Function)
 	finalizer := args[2].(*ast.Function)
 	callback := args[3].(*ast.Function)
-	_, ctxCopy, _ := evaluator.EvalFunction(*initializer, ctx)
+	_, ctxCopy, _ := evaluator.EvalFunction(*initializer, ctx, &ast.Null{})
 	checkCondition := func() bool {
-		result, _, _ := evaluator.EvalFunction(*condition, ctxCopy)
+		result, _, _ := evaluator.EvalFunction(*condition, ctxCopy, &ast.Null{})
 		return result.(*ast.Boolean).Value
 	}
 	finalize := func() {
-		evaluator.EvalFunction(*finalizer, ctxCopy)
+		evaluator.EvalFunction(*finalizer, ctxCopy, &ast.Null{})
 	}
 	for checkCondition() {
-		result, _, returned := evaluator.EvalFunction(*callback, ctxCopy)
+		result, _, returned := evaluator.EvalFunction(*callback, ctxCopy, &ast.Null{})
 		if result.GetKind() == ast.BREAK {
 			break
 		}

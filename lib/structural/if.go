@@ -8,13 +8,13 @@ import (
 func If(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 	condition := args[0].(*ast.Function)
 	checkCondition := func() bool {
-		result, _, _ := evaluator.EvalFunction(*condition, ctx)
+		result, _, _ := evaluator.EvalFunction(*condition, ctx, &ast.Null{})
 		return result.(*ast.Boolean).Value
 	}
 	var passed bool
 	if checkCondition() {
 		passed = true
-		result, _, returned := evaluator.EvalFunction(*args[1].(*ast.Function), ctx)
+		result, _, returned := evaluator.EvalFunction(*args[1].(*ast.Function), ctx, &ast.Null{})
 		if returned {
 			return &ast.Return{Value: result}
 		}

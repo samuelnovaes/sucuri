@@ -113,7 +113,7 @@ func readCall(code *string, tokens *[]token.Token) {
 func parseComment(code *string) {
 	if (*code)[1] == '/' {
 		shift(code)
-		for (*code)[0] != '\n' {
+		for len(*code) > 0 && (*code)[0] != '\n' {
 			shift(code)
 		}
 		return
@@ -123,7 +123,9 @@ func parseComment(code *string) {
 			shift(code)
 		}
 		shift(code)
-		shift(code)
+		if len(*code) > 0 {
+			shift(code)
+		}
 	}
 }
 

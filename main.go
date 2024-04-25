@@ -26,5 +26,5 @@ func main() {
 
 	tokens := lexer.Tokenize(string(code))
 	program := parser.ProduceAST(tokens)
-	evaluator.EvalFunction(program, &ctx)
+	evaluator.EvalFunction(program, &ctx, &ast.Null{})
 }

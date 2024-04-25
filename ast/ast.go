@@ -19,7 +19,7 @@ const (
 	CONTINUE   = iota
 )
 
-type LibFunction func(*Context, ...Expression) Expression
+type LibFunction func(ctx *Context, args ...Expression) Expression
 
 type Context map[string]*Reference
 

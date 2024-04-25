@@ -10,7 +10,7 @@ func Else(ctx *ast.Context, args ...ast.Expression) ast.Expression {
 		panic("Invalid ELSE operation")
 	}
 	if !(*ctx)["#IF"].Value.(*ast.Boolean).Value {
-		result, _, returned := evaluator.EvalFunction(*args[0].(*ast.Function), ctx)
+		result, _, returned := evaluator.EvalFunction(*args[0].(*ast.Function), ctx, &ast.Null{})
 		if returned {
 			return &ast.Return{Value: result}
 		}

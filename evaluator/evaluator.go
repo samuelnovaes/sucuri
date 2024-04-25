@@ -46,7 +46,7 @@ func evalCall(call ast.Call, ctx *ast.Context) ast.Expression {
 		(*ctx)[ident.Symbol] = &ast.Reference{Value: argEvaluated, Const: true}
 	}
 
-	result, _, _ := EvalFunction(*fn, ctx)
+	result, _, _ := EvalFunction(*fn, ctx, &ast.Null{})
 	return result
 }
 
@@ -85,12 +85,13 @@ func EvalExpression(node ast.Expression, ctx *ast.Context) ast.Expression {
 	return node
 }
 
-func EvalFunction(fn ast.Function, ctx *ast.Context) (ast.Expression, *ast.Context, bool) {
+func EvalFunction(fn ast.Function, ctx *ast.Context, this ast.Expression) (ast.Expression, *ast.Context, bool) {
 	ctxCopy := ast.Context{}
 	for key, value := range *ctx {
 		ctxCopy[key] = value
 	}
 	ctxCopy["#IF"] = nil
+	ctxCopy["this"] = &ast.Reference{Value: this, Const: true}
 
 	for _, expr := range fn.Body {
 		validateIf(expr, &ctxCopy)
